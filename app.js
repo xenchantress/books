@@ -9,7 +9,12 @@ const cors = require("cors");
 //console.log(process.env)
 const booksRouter = require("./api/books/routers"); // Import the router
 const morgan = require("morgan");
+const passport = require("passport");
+const localStrategy = require("./middleware/passport");
 
+
+app.use(passport.initialize());
+passport.use(localStrategy);
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
