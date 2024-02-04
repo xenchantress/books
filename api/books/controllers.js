@@ -1,5 +1,6 @@
 const Book = require("../../models/Book");
 
+
 const getAllBooks = async (req, res, next) => {
   try {
     const books = await Book.find();
@@ -14,7 +15,7 @@ const getBookById = async (req, res, next) => {
   try {
     const book = await Book.findById(_id);
     if (!book) {
-    //   return res.status(404).json({ error: "Book not found" });
+      //   return res.status(404).json({ error: "Book not found" });
     }
     res.json(book);
   } catch (error) {
@@ -22,9 +23,11 @@ const getBookById = async (req, res, next) => {
   }
 };
 const createBook = async (req, res, next) => {
-  const { title, author, price, image } = req.body;
   try {
-    const newBook = await Book.create({ title, author, price, image });
+    if (req.file) {
+      req.body.image = req.file.path;
+    }
+    const newBook = await Book.create(req.body);
     res.status(201).json(newBook);
   } catch (error) {
     next(error);
@@ -79,7 +82,6 @@ const deleteBook = async (req, res, next) => {
 //     const book = await Book.findById(_id);
 //     if(!book)
 //     return res.status(404).json({message:"Book with this Id could not be found"});
-
 
 // }
 
