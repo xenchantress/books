@@ -49,7 +49,7 @@ const signup = async (req, res) => {
       res.status(500).json({ error: error.message });
     }
   };
-  
+  // la charge utile doit porter le nom, L'identifiant, en particulier celui de L'auteur and more depending on the caracteristiques
   const generateToken = (author) => {
     const payload = { name: author.name, _id: author._id };
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
@@ -58,5 +58,7 @@ const signup = async (req, res) => {
     return token;
   };
   
+  module.exports = { Author, authorSchema, AuthorModel, signup, signin };
 
-module.exports = {Author, AuthorModel, signup, signin };
+// module.exports = {"Author, authorSchema, AuthorModel, signup, signin" };
+//  I think I misunderstood the quotations here

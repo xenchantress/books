@@ -3,6 +3,16 @@ const Post = require('../models/Post');
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+
+const errorHandler = (res, error) => {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+};
+
+const authenticateUser = (req, res, next) => {
+  next();
+};
 
 exports.createAuthor = async (req, res) => {
     try{
@@ -11,7 +21,7 @@ exports.createAuthor = async (req, res) => {
         await author.save();
         res.status(201).json(author);
     } catch (error){
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: error });
     }
 };
 
@@ -20,7 +30,8 @@ exports.getAuthors = async ( req, res) => {
         const authors = await Author.find().populate('posts');
         res.status(200).json(authors);
     } catch (error){
-        res.status(500).json({ error: error.message });
+      errorHandler(res, error);
+        // nope  res.status(500).json({ error: error.message });
     }
 };
 exports.createPost = async (req, res) => {
@@ -35,51 +46,53 @@ exports.createPost = async (req, res) => {
         await Author.findByIdAndUpdate(authorId, { $push: { posts: savedPost._id } });
         res.status(201).json(savedPost);
     } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+      errorHandler(res, error);        //res.status(500).json({ error: error.message });
+    }//updating
 };
 
 router.post('/:authorId/posts', async (req, res) => {
     try {
       const author = await Author.findById(req.params.authorId);
       if (!author) return res.status(404).json({ message: 'Author not found' });
-  
+  //finding a specific Id to update it
       const newPost = new Post({
         title: req.body.title,
         content: req.body.content,
-        author
-        : req.params.authorId
-    });
+        author : req.params.authorId,
+    }); // I confused myself here
 
     const savedPost = await newPost.save();
     author.posts.push(savedPost._id);
     await author.save();
     res.status(201).json(savedPost);
 } catch (error) {
-  res.status(500).json({ message: error.message });
+  errorHandler(res, error);
+ // res.status(500).json({ message: error.message });
 }
 });
+
 router.get('/', async (req, res) => {
     try {
       const authors = await Author.find().populate('posts');
       res.json(authors);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      errorHandler(res, error);
+      // res.status(500).json({ message: error.message });
+      // next(error)
     }
   });
 
   exports.signup = async (req, res) => {
     try {
       const { name, username, password } = req.body;
-
       const hashedPassword = await bcrypt.hash(password, 10);
-
       const author = new Author({ name, username, password: hashedPassword });
     await author.save();
     const token = generateToken(author);
     res.status(201).json({ author, token });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    errorHandler(res, error);
+   // res.status(500).json({ error: error.message });
   }
 };
 exports.signin = async (req, res) => {
@@ -88,7 +101,8 @@ exports.signin = async (req, res) => {
         const token = generateToken(req.author);
         res.json({ author: req.author, token });
       } catch (error) {
-        res.status(500).json({ error: error.message });
+        errorHandler(res, error);
+        //res.status(500).json({ error: error.message });
       }
     };
 
@@ -100,6 +114,11 @@ exports.signin = async (req, res) => {
         return token;
       };
 
+      const shorten = async ( req, res) => {
+        const authorId = req.author.id;
+        res.json({ message: 'URL shortened successfully'});
+      };
+
   
-  module.exports = router;
+  module.exports = { shorten,router };
         

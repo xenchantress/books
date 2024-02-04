@@ -9,39 +9,32 @@ const cors = require("cors");
 //console.log(process.env)
 const booksRouter = require("./api/books/routers"); // Import the router
 const morgan = require("morgan");
-const passport = require("passport");
-const localStrategy = require("./middleware/passport");
+// const passport = require("passport");
+// const localStrategy = require("./middlewares/Passport");
 
-
-app.use(passport.initialize());
-passport.use(localStrategy);
+// app.use(passport.initialize());
+// passport.use(jwtStrategy);
 
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, 'media/');
+  destination: function (req, file, cb) {
+    cb(null, "media/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname); // Set the filename
+  },
+});
 
-
-    },
-    filename: function (req, file, cb) {
-      cb(null, Date.now() + '-' + file.originalname); // Set the filename
-    },
-  });
-
-
-  const upload = multer({ storage: storage });
-
-
+const upload = multer({ storage: storage });
 
 //middleware
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cors());
 
-const path = require('path')
+const path = require("path");
 
 console.log(__dirname);
-app.use('/media', express.static(path.join(__dirname, 'media')));
-
+app.use("/media", express.static(path.join(__dirname, "media")));
 
 app.use((req, res, next) => {
   console.log(req.method, req.originalUrl);
@@ -66,7 +59,7 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 8000;
 connectDB();
 
-app.use('/api/upload', upload.single('bookImage'));
+app.use("/api/upload", upload.single("bookImage"));
 
 app.listen(PORT, () => {
   console.log(`App is running on port ${PORT}`);
